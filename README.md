@@ -45,7 +45,7 @@ public class IndexModel : PageModel
     public void OnGet()
     {
         //获取缓存时间
-        var value = _locker.Get<string>("textKey",
+        var value = _locker.Get<string>("testKey",
         () => cache.Get<CacheValueFormat<string>>("Cache_key"),
         () => DateTime.Now.ToString(),
         (a, b) => cache.Set<CacheValueFormat<string>>("Cache_key", a, b),
