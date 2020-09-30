@@ -3,6 +3,7 @@ Spring.Cache.Extensions 是一个为解决高并发场景缓存过期可能造�
 
 # 使用方法
 
+## 注册
 ```cs
 
 public void ConfigureServices(IServiceCollection services)
@@ -25,6 +26,34 @@ public void ConfigureServices(IServiceCollection services)
     });
 
     services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+}
+
+```
+
+## 使用
+
+```cs
+
+public class IndexModel : PageModel
+{
+    public static IMemoryCache cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
+    private AppClusterLocker _locker;
+    public IndexModel(AppClusterLocker locker)
+    {
+        _locker = locker;
+    }
+    public void OnGet()
+    {
+        //获取缓存时间
+        var value = _locker.Get<string>("textKey",
+        () => cache.Get<CacheValueFormat<string>>("Cache_key"),
+        () => DateTime.Now.ToString(),
+        (a, b) => cache.Set<CacheValueFormat<string>>("Cache_key", a, b),
+        TimeSpan.FromSeconds(23), 
+        TimeSpan.FromSeconds(600));
+
+        ViewData.Add("test", value);
+    }
 }
 
 ```
